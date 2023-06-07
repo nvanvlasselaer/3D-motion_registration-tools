@@ -87,6 +87,8 @@ def read_fifo_data():
     distort1 = None
     distort2 = None
 
+    counter = 0
+
     buffer = ""
 
     while True:
@@ -119,9 +121,12 @@ def read_fifo_data():
                     distort2 = station2["distortion"]
 
                 if quat1 is not None and quat2 is not None:
-                    euler_angles = calculate_angular_difference(quat1, quat2)
-                    angles.append(euler_angles)
+                    # Calculate and store angular differences every 10 iterations
+                    if counter % 10 == 0:
+                        euler_angles = calculate_angular_difference(quat1, quat2)
+                        angles.append(euler_angles)
 
+                    counter += 1
                     calibration_text = f"sensor1={distort1} sensor2={distort2}"
                     text_box.delete(1.0, tk.END)
                     text_box.insert(tk.END, calibration_text)
