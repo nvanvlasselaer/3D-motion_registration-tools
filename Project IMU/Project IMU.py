@@ -117,13 +117,12 @@ def read_serial_data():
                 if counter % 10 == 0:
                     euler_angles = calculate_angular_difference(quat1, quat2)
                     angles.append(euler_angles)
-
-                counter += 1
                 # Update calibration text box
-                calibration_text = f"sensor1={calib1} sensor2={calib2}"
-                text_box.delete(1.0, tk.END)
-                text_box.insert(tk.END, calibration_text)
-
+                    calibration_text = f"sensor1={calib1} sensor2={calib2}"
+                    text_box.delete(1.0, tk.END)
+                    text_box.insert(tk.END, calibration_text)
+                
+                counter += 1
                 # Prepare formatted data for output
                 dataout_row = [data_row[0]]
                 dataout_row.extend(quat1)

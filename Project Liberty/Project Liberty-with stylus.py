@@ -134,16 +134,18 @@ def read_fifo_data():
                     if counter % 10 == 0:
                         euler_angles = calculate_angular_difference(quat1, quat2)
                         angles.append(euler_angles)
+                        #update calibration text
+                        calibration_text = f"sensor1={distort1} sensor2={distort2} sensor3={distort3}"
+                        text_box.delete(1.0, tk.END)
+                        text_box.insert(tk.END, calibration_text)
+                        #update stylus text
+                        stylus_text = f"sensor3={loc3}"
+                        stylus_box.delete(1.0, tk.END)
+                        stylus_box.insert(tk.END, stylus_text)
 
                     counter += 1
-                    calibration_text = f"sensor1={distort1} sensor2={distort2} sensor3={distort3}"
-                    text_box.delete(1.0, tk.END)
-                    text_box.insert(tk.END, calibration_text)
-
-                    stylus_text = f"sensor3={loc3}"
-                    stylus_box.delete(1.0, tk.END)
-                    stylus_box.insert(tk.END, stylus_text)
-
+                
+                    # Prepare formatted data for output
                     dataout_row = [data_row[0]]
                     dataout_row.extend(quat1)
                     dataout_row.extend(quat2)
@@ -171,7 +173,7 @@ def update_plot():
     if len(angles) > 0:
         ax.clear()
         ax.plot(angles)
-        ax.legend(['x', 'y', 'z'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
+        ax.legend(['1', '2', '3'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
         ax.set_xlabel('Time')
         ax.set_ylabel('Angular difference (degrees)')
         canvas.draw()
