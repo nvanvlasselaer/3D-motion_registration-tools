@@ -19,6 +19,8 @@ data = deque(maxlen=1000)
 angles = deque(maxlen=1000)
 dataout = deque(maxlen=1000)
 
+euler_sequence = 'xyz'  # Default Euler sequence
+
 def choose_folder():
     global file_path
     default_path = os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -72,7 +74,7 @@ def calculate_angular_difference(quat1, quat2):
     r1 = R.from_quat(quat1)
     r2 = R.from_quat(quat2)
     r = r2 * r1.inv()
-    return r.as_euler('yxz', degrees=True)
+    return r.as_euler(euler_sequence, degrees=True)
 
 
 def read_fifo_data():
@@ -179,6 +181,10 @@ def log_text(message):
     log_box.insert(tk.END, message + "\n")
     log_box.see(tk.END)
 
+def set_euler_sequence(sequence):
+    global euler_sequence
+    euler_sequence = sequence
+
 # Create GUI
 root = tk.Tk()
 root.title("Polhemus Data Recorder and Plotter")
@@ -223,6 +229,43 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 canvas.draw()
 
+# Create radio buttons for Euler sequence selection
+euler_label = tk.Label(root, text="Euler Sequence:")
+euler_label.pack(side=tk.LEFT)
+
+euler_frame = tk.Frame(root)
+euler_frame.pack(side=tk.LEFT)
+
+sequence_var = tk.StringVar()
+
+# Create a grid to organize the radio buttons
+row_num = 0
+col_num = 0
+
+xyz_radio = tk.Radiobutton(euler_frame, text="xyz", variable=sequence_var, value="xyz", command=lambda: set_euler_sequence("xyz"))
+xyz_radio.grid(row=row_num, column=col_num, sticky="w")
+
+yxz_radio = tk.Radiobutton(euler_frame, text="yxz", variable=sequence_var, value="yxz", command=lambda: set_euler_sequence("yxz"))
+yxz_radio.grid(row=row_num, column=col_num+1, sticky="w")
+
+zxy_radio = tk.Radiobutton(euler_frame, text="zyx", variable=sequence_var, value="zyx", command=lambda: set_euler_sequence("zxy"))
+zxy_radio.grid(row=row_num, column=col_num+2, sticky="w")
+
+row_num = 1
+
+zyx_radio = tk.Radiobutton(euler_frame, text="xzy", variable=sequence_var, value="xzy", command=lambda: set_euler_sequence("zyx"))
+zyx_radio.grid(row=row_num, column=col_num, sticky="w")
+
+xzy_radio = tk.Radiobutton(euler_frame, text="yzx", variable=sequence_var, value="yzx", command=lambda: set_euler_sequence("xzy"))
+xzy_radio.grid(row=row_num, column=col_num+1, sticky="w")
+
+yzx_radio = tk.Radiobutton(euler_frame, text="zxy", variable=sequence_var, value="zxy", command=lambda: set_euler_sequence("yzx"))
+yzx_radio.grid(row=row_num, column=col_num+2, sticky="w")
+
+# Set default Euler sequence
+sequence_var.set(euler_sequence)
+set_euler_sequence(sequence_var.get())
+
 # Start serial data reading in a separate thread
 serial_thread = threading.Thread(target=read_fifo_data)
 serial_thread.daemon = True
@@ -235,6 +278,3 @@ plot_thread.start()
 
 # Start GUI loop
 root.mainloop()
-
-## Close the named pipe
-#fifo_fd.close()
