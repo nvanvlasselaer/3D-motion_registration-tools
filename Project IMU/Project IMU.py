@@ -22,9 +22,10 @@ output_file = 'quaternion_data.csv'
 ser = serial.Serial(port, baud_rate)
 
 data = deque(maxlen=1000)
-angles = deque(maxlen=1000)
+angles = deque(maxlen=100)
 dataout = deque(maxlen=1000)
 
+euler_sequence = 'xyz'  # Default Euler sequence
 
 def choose_folder():
     global file_path
@@ -83,7 +84,7 @@ def calculate_angular_difference(quat1, quat2):
     r1 = R.from_quat(quat1)
     r2 = R.from_quat(quat2)
     r = r2 * r1.inv()
-    return r.as_euler('zyx', degrees=True)
+    return r.as_euler(euler_sequence, degrees=True)
 
 
 def read_serial_data():
@@ -93,13 +94,17 @@ def read_serial_data():
 
     quat1 = None
     quat2 = None
+    counter = 0
 
     while True:
         data_row = []
         data_row.append(time.time())  # Append timestamp
         line = ser.readline().decode().strip()
+
         try:
             data = json.loads(line)
+
+            # Extract quaternion data from sensors
             if data['key'] == '/sensor/1':
                 quat1 = data['value']
                 calib1 = data['calibration']
@@ -108,17 +113,22 @@ def read_serial_data():
                 calib2 = data['calibration']
 
             if quat1 is not None and quat2 is not None:
-                euler_angles = calculate_angular_difference(quat1, quat2)
-                angles.append(euler_angles)
+                # Calculate and store angular differences every 10 iterations
+                if counter % 10 == 0:
+                    euler_angles = calculate_angular_difference(quat1, quat2)
+                    angles.append(euler_angles)
 
+                counter += 1
+                # Update calibration text box
                 calibration_text = f"sensor1={calib1} sensor2={calib2}"
                 text_box.delete(1.0, tk.END)
                 text_box.insert(tk.END, calibration_text)
 
+                # Prepare formatted data for output
                 dataout_row = [data_row[0]]
                 dataout_row.extend(quat1)
                 dataout_row.extend(quat2)
-                dataout_row.extend(euler_angles)
+                dataout_row.extend(euler_angles)  # The euler_angles variable is used here
                 dataout.append(dataout_row)
 
         except (ValueError, KeyError):
@@ -131,7 +141,7 @@ def update_plot():
     if len(angles) > 0:
         ax.clear()
         ax.plot(angles)
-        ax.legend(['x', 'y', 'z'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
+        ax.legend(['1', '2', '3'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
         ax.set_xlabel('Time')
         ax.set_ylabel('Angular difference (degrees)')
         canvas.draw()
@@ -142,6 +152,9 @@ def log_text(message):
     log_box.insert(tk.END, message + "\n")
     log_box.see(tk.END)
 
+def set_euler_sequence(sequence):
+    global euler_sequence
+    euler_sequence = sequence
 
 # Create GUI
 root = tk.Tk()
@@ -184,6 +197,43 @@ ax = fig.add_subplot(111)
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 canvas.draw()
+
+# Create radio buttons for Euler sequence selection
+euler_label = tk.Label(root, text="Euler Sequence:")
+euler_label.pack(side=tk.LEFT)
+
+euler_frame = tk.Frame(root)
+euler_frame.pack(side=tk.LEFT)
+
+sequence_var = tk.StringVar()
+
+# Create a grid to organize the radio buttons
+row_num = 0
+col_num = 0
+
+xyz_radio = tk.Radiobutton(euler_frame, text="xyz", variable=sequence_var, value="xyz", command=lambda: set_euler_sequence("xyz"))
+xyz_radio.grid(row=row_num, column=col_num, sticky="w")
+
+yxz_radio = tk.Radiobutton(euler_frame, text="yxz", variable=sequence_var, value="yxz", command=lambda: set_euler_sequence("yxz"))
+yxz_radio.grid(row=row_num, column=col_num+1, sticky="w")
+
+zxy_radio = tk.Radiobutton(euler_frame, text="zyx", variable=sequence_var, value="zyx", command=lambda: set_euler_sequence("zxy"))
+zxy_radio.grid(row=row_num, column=col_num+2, sticky="w")
+
+row_num = 1
+
+zyx_radio = tk.Radiobutton(euler_frame, text="xzy", variable=sequence_var, value="xzy", command=lambda: set_euler_sequence("zyx"))
+zyx_radio.grid(row=row_num, column=col_num, sticky="w")
+
+xzy_radio = tk.Radiobutton(euler_frame, text="yzx", variable=sequence_var, value="yzx", command=lambda: set_euler_sequence("xzy"))
+xzy_radio.grid(row=row_num, column=col_num+1, sticky="w")
+
+yzx_radio = tk.Radiobutton(euler_frame, text="zxy", variable=sequence_var, value="zxy", command=lambda: set_euler_sequence("yzx"))
+yzx_radio.grid(row=row_num, column=col_num+2, sticky="w")
+
+# Set default Euler sequence
+sequence_var.set(euler_sequence)
+set_euler_sequence(sequence_var.get())
 
 # Start serial data reading in a separate thread
 serial_thread = threading.Thread(target=read_serial_data)
