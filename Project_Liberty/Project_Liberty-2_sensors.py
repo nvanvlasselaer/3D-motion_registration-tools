@@ -96,7 +96,7 @@ def read_fifo_data():
     while True:
         data_in = os.read(fifo_fd, 4096)
         buffer += data_in.decode('utf-8')
-
+        print(data_in)
         # Process complete JSON objects in the buffer
         while True:
             try:
@@ -105,7 +105,7 @@ def read_fifo_data():
 
                 data_row = []
                 data_row.append(time.time())  # Append timestamp
-
+                
                 # Extract station_id from the data
                 station_id = data.get("station_id")
                 # Store data in the corresponding variable based on station_id
