@@ -15,9 +15,9 @@ fifo_path = "/tmp/motion_data_fifo"
 # Open the named pipe for reading
 fifo_fd = os.open(fifo_path, os.O_RDONLY)
 
-data = deque(maxlen=1000)
-angles = deque(maxlen=1000)
-dataout = deque(maxlen=1000)
+data = deque(maxlen=5000)
+angles = deque(maxlen=500) #needs to be 10x smaller because only calculated every 10 iterations
+dataout = deque(maxlen=5000)
 
 euler_sequence = 'xyz'  # Default Euler sequence
 
