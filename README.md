@@ -77,4 +77,4 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use and 
 
 ## Acknowledgments
 
-The driver has been derived from documentation from Polhemus, available in the Liberty Manual
+The driver has been derived from documentation from Polhemus, available in the Liberty Manual.
