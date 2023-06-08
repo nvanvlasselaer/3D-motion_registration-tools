@@ -38,7 +38,7 @@ def write_data_to_csv(dataout, subject_name):
     global file_path
     file_name = subject_name + '.csv'  # Create the file name by appending subject_name with '.csv'
     file_path_name = os.path.join(file_path, file_name)  # Combine the directory path with the file name
-    header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'w2', 'x2', 'y2', 'z2', 'x_diff', 'y_diff', 'z_diff']
+    header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'w2', 'x2', 'y2', 'z2', 'loc1_x', 'loc1_y', 'loc1_z', 'loc2_x', 'loc2_y', 'loc2_z']
     with open(file_path_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(header_row)
@@ -58,7 +58,7 @@ def write_snapshot_to_csv(dataout_row, subject_name):
     global file_path
     file_name = subject_name + '.csv'  # Create the file name by appending subject_name with '.csv'
     file_path_name = os.path.join(file_path, file_name)  # Combine the directory path with the file name
-    header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'w2', 'x2', 'y2', 'z2', 'x_diff', 'y_diff', 'z_diff']
+    header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'w2', 'x2', 'y2', 'z2', 'loc1_x', 'loc1_y', 'loc1_z', 'loc2_x', 'loc2_y', 'loc2_z']
     with open(file_path_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(dataout_row)
@@ -86,6 +86,8 @@ def read_fifo_data():
     station2 = None
     quat1 = None
     quat2 = None
+    loc1 = None
+    loc1 = None
     distort1 = None
     distort2 = None
 
@@ -118,7 +120,8 @@ def read_fifo_data():
                     # Extract the quaternion components for each station
                     quat1 = station1['quaternion_0'], station1['quaternion_1'], station1['quaternion_2'], station1['quaternion_3']
                     quat2 = station2['quaternion_0'], station2['quaternion_1'], station2['quaternion_2'], station2['quaternion_3']
-
+                    loc1 = station1['x'], station1['y'], station1['z']
+                    loc2 = station2['x'], station2['y'], station2['z']
                     distort1 = station1["distortion"]
                     distort2 = station2["distortion"]
 
@@ -131,6 +134,10 @@ def read_fifo_data():
                         calibration_text = f"sensor1={distort1} sensor2={distort2}"
                         text_box.delete(1.0, tk.END)
                         text_box.insert(tk.END, calibration_text)
+                        #update location text
+                        location_text = f"sensor1={loc1} sensor2={loc2}"
+                        location_box.delete(1.0, tk.END)
+                        location_box.insert(tk.END, location_text)
                     
                     counter += 1
                     
@@ -138,7 +145,8 @@ def read_fifo_data():
                     dataout_row = [data_row[0]]
                     dataout_row.extend(quat1)
                     dataout_row.extend(quat2)
-                    dataout_row.extend(euler_angles)
+                    dataout_row.extend(loc1)
+                    dataout_row.extend(loc2)
                     dataout.append(dataout_row)
 
             except (ValueError, KeyError, IndexError):
@@ -201,6 +209,9 @@ snapshot_button.pack(side='left', padx=5)
 
 clear_button = tk.Button(root, text="Clear Data", command=clear_data)
 clear_button.pack()
+
+location_box = tk.Text(root, height=1, width=160)
+location_box.pack(side=tk.BOTTOM)
 
 # Create text box
 text_box = tk.Text(root, height=1, width=160)
