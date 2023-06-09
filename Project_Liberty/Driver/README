@@ -1,52 +1,50 @@
+# Polhemus Liberty Driver for Linux
 
-Polhemus Liberty (v2) (tm) Motion Tracker driver for Linux
+This driver provides support for the Polhemus Liberty v2 motion tracker on Linux systems. The driver utilizes the USB2 interface of the Liberty v2 device to transmit tracking data at a frequency of 120Hz (optionally 240Hz).
 
-This driver supports the Polhemus Liberty v2 using its USB2 interface to
-transmit tracking data at 240Hz.
+The driver consists of two main parts:
 
-Please find new releases at Sourceforge:
-https://sourceforge.net/projects/polhemusliberty/
+1. Firmware loader: This includes scripts for udev and the firmware itself.
+2. Library based on libUSB: The library communicates with the motion tracker and is built on top of the libUSB library.
 
-This driver has two parts: 
- - Firmware loader (scripts for udev and the firmware)
- - A library based on libUSB that communicates with the motion tracker
+## Dependencies
 
+Before installing and using the driver, ensure that the following dependencies are installed on your system:
 
-Dependencies:
- - fxload  (to load the firmware onto the USB device)
- - libusb-dev  (userspace USB programming library development files
-   Library for programming USB applications without the knowledge
-   of Linux kernel internals.)
+- fxload: Used to load the firmware onto the USB device.
+- libusb-dev: Development files for the libUSB library, which is used for programming USB applications without requiring knowledge of Linux kernel internals.
 
-In Debian GNU/Linux, simply install them by typing:
-    sudo apt-get install fxload libusb-dev
+On Debian GNU/Linux, you can install these dependencies by running the following command:
 
+```
+sudo apt-get install fxload libusb-dev
+```
 
-Follow the instructions in the firmware_load directory to install the udev
-configuration files, and firmware files.  Then run make in the 'src'
-directory.  Execute the program:
+## Installation
 
-./liberty2
+Follow these steps to install and set up the driver:
 
-It should detect the motion tracker, how many sensors are attached to it,
-and start printing the position/orientation data to stdout
+1. Install the dependencies mentioned above using the provided command.
+2. Navigate to the `firmware_load` directory and follow the instructions provided there to install the udev configuration files and firmware files.
+3. Run the `make` command in the `src` directory to build the driver.
+4. Once the build process is complete, execute the program using the following command:
 
-To record to a file, the following is enough:
+```
+./liberty
+```
 
-./liberty2 > motion_recording.txt
+The driver should detect the connected motion tracker and display the number of sensors attached to it. It will then start printing the position and orientation data to the standard output (stdout).
 
-Note: Connect the first sensor to input #1, and the rest to the following
-inputs.  Do not leave a sensor input empty in between.  For example, for
-three sensors, use inputs #1, #2, #3, and not #1, #2, #5.
+Note: Ensure that you connect the sensors correctly. Connect the first sensor to input #1 and subsequent sensors to the following inputs without leaving any empty inputs in between. For example, if you have three sensors, connect them to inputs #1, #2, and #3, rather than #1, #2, and #5.
 
-If you wish to make your own programs, you can use liberty.c and liberty.h,
-as they handle all the low level communication to the Polhemus Liberty v2
-(tm) device and offer a nice API.
+## Development
 
-We developed this driver as a part of the Cognition for Technical Systems
-(CoTeSys) project (http://www.cotesys.org), working at the Technische
-Universitaet Muenchen, at the chair for intelligent autonomous systems
-(http://www9.cs.tum.edu).  Collaborators: Alexis Maldonado, Federico Ruiz,
-Jonathan Kleinehellefort, and Ingo Kresse, under the supervision of Prof. 
-Michael Beetz, PhD.
+If you wish to develop your own programs utilizing the Polhemus Liberty v2 motion tracker, you can utilize the provided `liberty.c` and `liberty.h` files. These files handle all the low-level communication with the Liberty v2 device and offer a convenient API for accessing the tracking data.
+
+## Acknowledgments
+
+This driver includes parts implemented from the Cognition for Technical Systems (CoTeSys) project, working at the Technische Universitaet Muenchen, specifically at the chair for intelligent autonomous systems. The project's collaborators include Alexis Maldonado, Federico Ruiz, Jonathan Kleinehellefort, and Ingo Kresse, under the supervision of Prof. Michael Beetz, PhD.
+
+We would like to express our gratitude to the auteurs for making their code available and contributing to the development of this driver.
+
 
