@@ -78,6 +78,7 @@ def clear_data():
     angles.clear()
     ax.clear()
     canvas.draw()
+    counter.clear()
 
 
 def calculate_angular_difference(quat1, quat2):
@@ -91,7 +92,8 @@ def read_serial_data():
     global angles, calib1, calib2
     global dataout
     global dataout_row
-
+    global counter
+    
     quat1 = None
     quat2 = None
     counter = 0
