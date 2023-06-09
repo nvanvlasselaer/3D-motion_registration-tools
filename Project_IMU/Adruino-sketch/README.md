@@ -1,4 +1,4 @@
-# BNO055 Sensor Data Readme
+# DualSensor-IMU Readme
 
 This folder contains an Arduino sketch that reads data from two BNO055 sensors and sends the sensor readings and calibration information over the serial port.
 
