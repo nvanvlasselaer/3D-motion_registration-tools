@@ -70,7 +70,8 @@ The development of the project is ongoing, with the goal of adding support for o
 The repository contains the following files:
 
 - `Project_IMU.py`: Python script for reading data from IMU sensors and displaying it in the GUI.
-- `Project_Liberty.py`: Python script for reading data from Polhemus Liberty sensors and displaying it in the GUI.
+- `Project_Liberty-2_sensors.py`: Python script for reading data from two Polhemus Liberty sensors and displaying it in the GUI.
+- 'Project_Liberty-with stylus.py': Python script for reading data from two Polhemus Liberty sensors and the included stylus and displaying it in the GUI.
 
 - Within the Project Liberty there is also a Driver for the Polhemus Liberty system, providing the necessary communication and data retrieval functionalities. For now the Polhemus driver only works on Linux. Follow the instuctions provided there.
 
