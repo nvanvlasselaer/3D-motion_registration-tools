@@ -62,6 +62,9 @@ The development of the project is ongoing, with the goal of adding support for o
 
 12. If you only want a snapshot of the currant position of the sensors, use the "Save snapshot" button.
 
+![Image Alt Text](3D-motion_registration-tool_screenshot.jpg)
+
+
 ## Project Structure
 
 The repository contains the following files:
