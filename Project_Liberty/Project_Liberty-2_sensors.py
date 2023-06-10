@@ -246,18 +246,18 @@ xyz_radio.grid(row=row_num, column=col_num, sticky="w")
 yxz_radio = tk.Radiobutton(euler_frame, text="yxz", variable=sequence_var, value="yxz", command=lambda: set_euler_sequence("yxz"))
 yxz_radio.grid(row=row_num, column=col_num+1, sticky="w")
 
-zxy_radio = tk.Radiobutton(euler_frame, text="zyx", variable=sequence_var, value="zyx", command=lambda: set_euler_sequence("zxy"))
+zxy_radio = tk.Radiobutton(euler_frame, text="zyx", variable=sequence_var, value="zyx", command=lambda: set_euler_sequence("zyx"))
 zxy_radio.grid(row=row_num, column=col_num+2, sticky="w")
 
 row_num = 1
 
-zyx_radio = tk.Radiobutton(euler_frame, text="xzy", variable=sequence_var, value="xzy", command=lambda: set_euler_sequence("zyx"))
+zyx_radio = tk.Radiobutton(euler_frame, text="xzy", variable=sequence_var, value="xzy", command=lambda: set_euler_sequence("xzy"))
 zyx_radio.grid(row=row_num, column=col_num, sticky="w")
 
-xzy_radio = tk.Radiobutton(euler_frame, text="yzx", variable=sequence_var, value="yzx", command=lambda: set_euler_sequence("xzy"))
+xzy_radio = tk.Radiobutton(euler_frame, text="yzx", variable=sequence_var, value="yzx", command=lambda: set_euler_sequence("yzx"))
 xzy_radio.grid(row=row_num, column=col_num+1, sticky="w")
 
-yzx_radio = tk.Radiobutton(euler_frame, text="zxy", variable=sequence_var, value="zxy", command=lambda: set_euler_sequence("yzx"))
+yzx_radio = tk.Radiobutton(euler_frame, text="zxy", variable=sequence_var, value="zxy", command=lambda: set_euler_sequence("zxy"))
 yzx_radio.grid(row=row_num, column=col_num+2, sticky="w")
 
 # Set default Euler sequence
