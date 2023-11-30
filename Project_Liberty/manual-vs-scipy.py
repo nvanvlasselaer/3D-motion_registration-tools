@@ -9,6 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from scipy.spatial.transform import Rotation as R
 from collections import deque
+import math
 
 fifo_path = "/tmp/motion_data_fifo"
 
@@ -16,8 +17,11 @@ fifo_path = "/tmp/motion_data_fifo"
 fifo_fd = os.open(fifo_path, os.O_RDONLY)
 
 data = deque(maxlen=5000)
-angles = deque(maxlen=1000) #needs to be 5x smaller because only calculated every 2 iterations and plotted every 10 
+angles = deque(maxlen=1200) #needs to be 5x smaller because only calculated every 2 iterations and plotted every 10 
 dataout = deque(maxlen=5000)
+sensor1_angles = deque(maxlen=500)
+sensor2_angles = deque(maxlen=500)
+manual_angles = deque(maxlen=500)
 
 euler_sequence = 'xyz'  # Default Euler sequence
 
@@ -38,7 +42,7 @@ def write_data_to_csv(dataout, subject_name):
     global file_path
     file_name = subject_name + '.csv'  # Create the file name by appending subject_name with '.csv'
     file_path_name = os.path.join(file_path, file_name)  # Combine the directory path with the file name
-    data_header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'loc1_x','loc1_y', 'loc1_z','time2','w2', 'x2', 'y2', 'z2', 'loc2_x', 'loc2_y', 'loc2_z']
+    data_header_row = ['Time', 'w1', 'x1', 'y1', 'z1', 'loc1_x','loc1_y', 'loc1_z']
 
     # Create a copy of dataout before iterating over it
     dataout_copy = list(dataout)
@@ -83,7 +87,7 @@ def write_snapshot_to_csv(snapout_row, subject_name):
     global file_path
     file_name = subject_name + '.csv'  # Create the file name by appending subject_name with '.csv'
     file_path_name = os.path.join(file_path, file_name)  # Combine the directory path with the file name
-    snap_header_row = ['Snapshot Counter', 'Time', 'w1', 'x1', 'y1', 'z1', 'loc1_x','loc1_y', 'loc1_z','time2','w2', 'x2', 'y2', 'z2', 'loc2_x', 'loc2_y', 'loc2_z', 'stylus_x', 'stylus_y', 'stylus_z']
+    snap_header_row = ['Snapshot Counter', 'Time', 'w1', 'x1', 'y1', 'z1', 'loc1_x','loc1_y', 'loc1_z']
     
     with open(file_path_name, mode='a', newline='') as file:  # Use 'a' mode for append
         writer = csv.writer(file)
@@ -113,6 +117,38 @@ def calculate_angular_difference(quat1, quat2):
     r = r2 * r1.inv()
     return r.as_euler(euler_sequence, degrees=True)
 
+# def quat1_to_euler_xyz(quat1):
+#     r = R.from_quat(quat1)
+#     return r.as_euler(euler_sequence, degrees=True)
+
+def quat2_to_euler_xyz(quat2):
+    r = R.from_quat(quat2)
+    return r.as_euler(euler_sequence, degrees=True)
+
+def quaternion_to_euler_xyz(q):
+    roll = math.degrees(math.atan2(2*(q[0]*q[1] + q[2]*q[3]), 1 - 2*(q[1]**2 + q[2]**2)))
+    pitch = math.degrees(math.asin(2*(q[0]*q[2] - q[3]*q[1])))
+    yaw = math.degrees(math.atan2(2*(q[0]*q[3] + q[1]*q[2]), 1 - 2*(q[2]**2 + q[3]**2)))
+    return roll, pitch, yaw
+
+# def quaternion_to_euler_xyz(q):  # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+#     # Roll (x-axis rotation)
+#     sinr_cosp = 2 * (q[0] * q[1] + q[2] * q[3])
+#     cosr_cosp = 1 - 2 * (q[1] * q[1] + q[2] * q[2])
+#     roll = math.atan2(sinr_cosp, cosr_cosp)
+
+#     # Pitch (y-axis rotation)
+#     sinp = math.sqrt(1 + 2 * (q[0] * q[2] - q[1] * q[3]))
+#     cosp = math.sqrt(1 - 2 * (q[0] * q[2] - q[1] * q[3]))
+#     pitch = math.atan2(sinp, cosp)
+
+#     # Yaw (z-axis rotation)
+#     siny_cosp = 2 * (q[0] * q[3] + q[1] * q[2])
+#     cosy_cosp = 1 - 2 * (q[2] * q[2] + q[3] * q[3])
+#     yaw = math.atan2(siny_cosp, cosy_cosp)
+
+#     return roll, pitch, yaw
+
 recording = True
 RawData = False
 Stylus = False
@@ -123,6 +159,9 @@ def read_fifo_data():
     global dataout_row
     global snapout_row
     global recording
+    global sensor1_angles
+    global sensor2_angles
+    # global manual_angles
 
     station1 = None
     station2 = None
@@ -159,6 +198,9 @@ def read_fifo_data():
                     # Extract station_id from the data
                     station_id = data.get("station_id")
                     # Store data in the corresponding variable based on station_id
+                    sensor1_xyz = None
+                    manual_xyz = None
+
                     if station_id == 0:
                         station1 = data
                         quat1 = station1['quaternion_0'], station1['quaternion_1'], station1['quaternion_2'], station1['quaternion_3']
@@ -167,6 +209,12 @@ def read_fifo_data():
                         dataout1_row = [data_row[0]]
                         dataout1_row.extend(quat1)
                         dataout1_row.extend(loc1)
+                        if counter % 10 == 0:
+                            sensor1_xyz = quaternion_to_euler_xyz(quat1)
+                            sensor1_angles.append(sensor1_xyz)
+                            # manual_xyz = quaternion_to_euler_xyz(quat1)
+                            # manual_angles.append(manual_xyz)
+                        counter += 1
 
                     elif station_id == 1:
                         station2 = data
@@ -181,6 +229,10 @@ def read_fifo_data():
                         # Create dataout_row and append it to dataout when station_id == 1
                         dataout_row = dataout1_row + dataout2_row
                         dataout.append(dataout_row)
+                        if counter % 10 == 0:
+                            sensor2_xyz = quat2_to_euler_xyz(quat2)
+                            sensor2_angles.append(sensor2_xyz)
+
 
                     elif station_id == 2:
                         if Stylus:
@@ -256,37 +308,42 @@ def extract_json_object(buffer):
         return json_object, buffer
     return "", buffer
 
-show_lines = True  # Variable to track whether lines are currently visible
 
-def toggle_lines():
-    global show_lines
-    show_lines = not show_lines
-    update_lines_visibility()
-
-def update_lines_visibility():
-    line_visibility = 'visible' if show_lines else 'hidden'
-    
-    ax.lines[3].set_visible(show_lines)  # Line at y=0
-    ax.lines[4].set_visible(show_lines)  # Line at y=10
-    ax.lines[5].set_visible(show_lines)  # Line at y=-10
-    
-    canvas.draw()
-
-def update_plot():
+def update_plot1():
     global angles
+    global sensor1_angles
+    # global manual_angles
 
-    if len(angles) > 0:
-        ax.clear()
-        ax.plot(angles)
-        ax.axhline(y=0, color='gray', linestyle='--', linewidth=1)  # Add line at y=0
-        ax.axhline(y=10, color='red', linestyle='--', linewidth=1)  # Add line at y=10
-        ax.axhline(y=-10, color='red', linestyle='--', linewidth=1)  # Add line at y=-10
-        ax.legend([f'{axis}' for i, axis in enumerate(euler_sequence)], bbox_to_anchor=(1, 1), loc='upper left')
-        ax.set_xlabel('Time')
-        ax.set_ylabel('Angular difference (degrees)')
-        update_lines_visibility()  # Update lines visibility
-        # canvas.draw()
-    root.after(200, update_plot)  # Update plot every 200ms
+    # if len(manual_angles) > 0:
+    #     ax.clear()
+    #     ax.plot(manual_angles)
+    if len(sensor1_angles) > 0:
+        ax1.clear()
+        ax1.plot(sensor1_angles)
+        ax1.axhline(y=0, color='gray', linestyle='--', linewidth=1)  # Add line at y=0
+        ax1.axhline(y=10, color='red', linestyle='--', linewidth=1)  # Add line at y=10
+        ax1.axhline(y=-10, color='red', linestyle='--', linewidth=1)  # Add line at y=-10
+        ax1.legend(['1', '2', '3'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
+        ax1.set_xlabel('Time')
+        ax1.set_ylabel('Sensor 1 - Manual')
+        canvas.draw()
+    root.after(200, update_plot1)  # Update plot every 200ms
+
+def update_plot2():
+    global angles
+    global sensor2_angles
+
+    if len(sensor2_angles) > 0:
+        ax2.clear()
+        ax2.plot(sensor2_angles)
+        ax2.axhline(y=0, color='gray', linestyle='--', linewidth=1)  # Add line at y=0
+        ax2.axhline(y=10, color='red', linestyle='--', linewidth=1)  # Add line at y=10
+        ax2.axhline(y=-10, color='red', linestyle='--', linewidth=1)  # Add line at y=-10
+        ax2.legend(['1', '2', '3'], bbox_to_anchor=(1.05, 1), loc='upper left')  ### check Euler sequence!
+        ax2.set_xlabel('Time')
+        ax2.set_ylabel('Sensor 2 - Scipy')
+        canvas.draw()
+    root.after(200, update_plot2)  # Update plot every 200ms
 
 def log_text(message):
     log_box.insert(tk.END, message + "\n")
@@ -299,7 +356,7 @@ def set_euler_sequence(sequence):
 
 # Create GUI
 root = tk.Tk()
-root.title("Polhemus Data Recorder and Plotter")
+root.title("Polhemus Manual vs Scipy comparison")
 
 # Frame for directory and filename
 info_frame = tk.Frame(root)
@@ -357,9 +414,6 @@ show_raw_data_button.pack(side='left', padx=5)
 pause_raw_data_button = tk.Button(control_frame, text="Pause Raw Data", command=pause_raw_data)
 pause_raw_data_button.pack(side='left', padx=5)
 
-show_hide_lines_button = tk.Button(control_frame, text="Show/Hide Lines", command=toggle_lines)
-show_hide_lines_button.pack(side='left', padx=5)
-
 # Frame for stylus activation/deactivation
 stylus_frame = tk.Frame(root)
 stylus_frame.pack(pady=10)
@@ -390,16 +444,16 @@ location_box.pack(side=tk.BOTTOM)
 calibration_box = tk.Text(root, height=1, width=160)
 calibration_box.pack(side=tk.BOTTOM)
 
-
 # Create plot
-fig = Figure(figsize=(6, 4), dpi=100)
-ax = fig.add_subplot(111)
+fig = Figure(figsize=(10, 4), dpi=100)
+ax1 = fig.add_subplot(211)  # First subplot
+ax2 = fig.add_subplot(212)  # Second subplot
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 canvas.draw()
 
 # Create radio buttons for Euler sequence selection
-euler_label = tk.Label(root, text="Euler Sequence:")
+euler_label = tk.Label(root, text="Scipy Euler Sequence:")
 euler_label.pack(side=tk.LEFT)
 
 euler_frame = tk.Frame(root)
@@ -446,9 +500,15 @@ serial_thread.daemon = True
 serial_thread.start()
 
 # Start plot updating in a separate thread
-plot_thread = threading.Thread(target=update_plot)
-plot_thread.daemon = True
-plot_thread.start()
+plot1_thread = threading.Thread(target=update_plot1)
+plot1_thread.daemon = True
+plot1_thread.start()
+
+# Start plot updating in a separate thread
+plot2_thread = threading.Thread(target=update_plot2)
+plot2_thread.daemon = True
+plot2_thread.start()
+
 
 update_snapshot_counter_label()
 # update_plot()

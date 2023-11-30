@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 
 path = '//Users/nicolas/Desktop/testdata/'
-filename = 'rthrdata.csv'
+filename = 'data.csv'
 data = path + filename
 
 ##### conversion to euler angles #####
