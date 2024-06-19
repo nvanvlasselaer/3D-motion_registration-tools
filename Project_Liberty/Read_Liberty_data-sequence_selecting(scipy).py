@@ -10,9 +10,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import threading
 
-path = '//Users/nicolas/Desktop/testdata/'
-filename = 'data.csv'
-data = path + filename
+# path = '/Users/nicolas/Desktop/Polhemus DATA/Data Bregje/'
+# filename = 'Bregje-Lsnapshot.csv'
+# data = path + filename
+
+data = '/Users/nicolas/Github/nvanvlasselaer/scribbles/DATA/knee_kinematics/Nicolas-Ldata.csv'
 
 ##### conversion to euler angles #####
 
@@ -35,13 +37,13 @@ def quaternion_to_euler2(q2):
 def calculate_angular_difference(q1, q2):
     r1 = R.from_quat(q1)
     r2 = R.from_quat(q2)
-    r = r1 * r2.inv()  # tibia relative to femur
+    r = r1 * r2.inv()
     return r.as_euler(euler_sequence, degrees=True)
 
 def calculate_angular_difference_inv(q1, q2):
     r1 = R.from_quat(q1)
     r2 = R.from_quat(q2)
-    r = r2 * r1.inv()  # femur relative to tibia
+    r = r2 * r1.inv()
     return r.as_euler(euler_sequence, degrees=True)
 
 def set_euler_sequence(sequence):
@@ -79,6 +81,8 @@ def set_euler_sequence(sequence):
         z2 = float(row['z2'])
         q1 = w1, x1, y1, z1
         q2 = w2, x2, y2, z2
+        # q1 = [x1, y1, z1, w1] # correct order for scipy
+        # q2 = [x2, y2, z2, w2] # correct order for scipy
 
         Sensor1 = quaternion_to_euler1(q1)
         Sensor2 = quaternion_to_euler2(q2)

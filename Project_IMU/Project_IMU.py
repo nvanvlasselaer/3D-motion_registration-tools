@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from scipy.spatial.transform import Rotation as R
 from collections import deque
 import os
+import numpy as np
 
 # Define the serial port and baud rate
 port = '/dev/cu.usbserial-02898D2B'  # Change this to the appropriate serial port
@@ -80,11 +81,18 @@ def clear_data():
     canvas.draw()
     counter.clear()
 
+def reorder_quaternion(quat):
+    # Reorder quaternion from w, x, y, z to x, y, z, w for Scipy
+    return [quat[1], quat[2], quat[3], quat[0]]
 
-def calculate_angular_difference(quat1, quat2):
-    r1 = R.from_quat(quat1)
-    r2 = R.from_quat(quat2)
-    r = r2 * r1.inv()
+def calculate_angular_difference(q1, q2):
+    r1 = R.from_quat(q1)
+    r2 = R.from_quat(q2)
+    r = r1.inv() * r2
+    return r.as_euler(euler_sequence, degrees=True)
+
+def quaternion_to_euler(q):
+    r = R.from_quat(q)
     return r.as_euler(euler_sequence, degrees=True)
 
 
@@ -117,7 +125,12 @@ def read_serial_data():
             if quat1 is not None and quat2 is not None:
                 # Calculate and store angular differences every 10 iterations
                 if counter % 10 == 0:
-                    euler_angles = calculate_angular_difference(quat1, quat2)
+                    scipy_quat1 = reorder_quaternion(quat1)
+                    scipy_quat2 = reorder_quaternion(quat2)
+                    euler_angles = calculate_angular_difference(scipy_quat1, scipy_quat2)
+                    # euler_angles = quaternion_to_euler(reordered_quat1)
+
+
                     angles.append(euler_angles)
                 # Update calibration text box
                     calibration_text = f"sensor1={calib1} sensor2={calib2}"

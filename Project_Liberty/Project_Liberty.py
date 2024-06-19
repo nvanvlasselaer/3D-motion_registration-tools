@@ -110,7 +110,7 @@ def clear_data():
 def calculate_angular_difference(quat1, quat2):
     r1 = R.from_quat(quat1)
     r2 = R.from_quat(quat2)
-    r = r2 * r1.inv()
+    r = r1.inv() * r2
     return r.as_euler(euler_sequence, degrees=True)
 
 recording = True
@@ -162,6 +162,7 @@ def read_fifo_data():
                     if station_id == 0:
                         station1 = data
                         quat1 = station1['quaternion_0'], station1['quaternion_1'], station1['quaternion_2'], station1['quaternion_3']
+                        scipy_quat1 = quat1[1], quat1[2], quat1[3], quat1[0] # Reorder quaternion to x, y, z, w for Scipy
                         loc1 = station1['x'], station1['y'], station1['z']
                         distort1 = station1["distortion"]
                         dataout1_row = [data_row[0]]
@@ -171,6 +172,7 @@ def read_fifo_data():
                     elif station_id == 1:
                         station2 = data
                         quat2 = station2['quaternion_0'], station2['quaternion_1'], station2['quaternion_2'], station2['quaternion_3']
+                        scipy_quat2 = quat2[1], quat2[2], quat2[3], quat2[0] # Reorder quaternion to x, y, z, w for Scipy
                         loc2 = station2['x'], station2['y'], station2['z']
                         distort2 = station2["distortion"]
                         # Initialize dataout_row for station_id 1
@@ -196,7 +198,7 @@ def read_fifo_data():
                     if station1 and station2:
 
                         if counter % 10 == 0:
-                            euler_angles = calculate_angular_difference(quat1, quat2)
+                            euler_angles = calculate_angular_difference(scipy_quat1, scipy_quat2)
                             angles.append(euler_angles)
 
                             if RawData:

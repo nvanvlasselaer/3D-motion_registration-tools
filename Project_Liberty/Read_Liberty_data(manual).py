@@ -6,8 +6,8 @@ import csv
 import matplotlib.pyplot as plt
 import os
 
-path = '//Users/nicolas/Desktop/testdata/'
-filename = 'data.csv'
+path = '/Users/nicolas/Desktop/Polhemus DATA/Data Bregje/'
+filename = 'Bregje-Ldata.csv'
 data = path + filename
 
 ##### conversion to euler angles #####
@@ -64,13 +64,13 @@ def quaternion_to_euler2(w2, x2, y2, z2):
 def calculate_angular_difference_xzy(q1, q2):
     r1 = R.from_quat(q1)
     r2 = R.from_quat(q2)
-    r = r1 * r2.inv()  # tibia relative to femur
+    r = r1 * r2.inv()
     return r.as_euler('xzy', degrees=True)
 
 def calculate_angular_difference_xyz_inv(q1, q2):
     r1 = R.from_quat(q1)
     r2 = R.from_quat(q2)
-    r = r2 * r1.inv()  # femur relative to tibia
+    r = r2 * r1.inv()
     return r.as_euler('xyz', degrees=True)
 
 def calculate_angular_difference_yxz(q1, q2):
