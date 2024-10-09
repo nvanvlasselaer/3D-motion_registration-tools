@@ -104,7 +104,8 @@ def clear_data():
     data.clear()
     dataout.clear()
     angles.clear()
-    ax.clear()
+    ax1.clear()
+    ax2.clear()
     snapshot_counter = 0  # Reset the snapshot counter to 0
     canvas.draw()
     # Update the snapshot counter label after resetting
@@ -186,13 +187,14 @@ def read_fifo_data():
                     if station_id == 0:
                         station1 = data
                         quat1 = station1['quaternion_0'], station1['quaternion_1'], station1['quaternion_2'], station1['quaternion_3']
+                        scipy_quat1 = quat1[1], quat1[2], quat1[3], quat1[0]
                         loc1 = station1['x'], station1['y'], station1['z']
                         distort1 = station1["distortion"]
                         dataout1_row = [data_row[0]]
                         dataout1_row.extend(quat1)
                         dataout1_row.extend(loc1)
                         if counter % 10 == 0:
-                            sensor1_xyz = quat1_to_euler_xyz(quat1)
+                            sensor1_xyz = quat1_to_euler_xyz(scipy_quat1)
                             sensor1_angles.append(sensor1_xyz)
                             # manual_xyz = quaternion_to_euler_xyz(quat1)
                             # manual_angles.append(manual_xyz)
@@ -201,6 +203,7 @@ def read_fifo_data():
                     elif station_id == 1:
                         station2 = data
                         quat2 = station2['quaternion_0'], station2['quaternion_1'], station2['quaternion_2'], station2['quaternion_3']
+                        scipy_quat2 = quat2[1], quat2[2], quat2[3], quat2[0]
                         loc2 = station2['x'], station2['y'], station2['z']
                         distort2 = station2["distortion"]
                         # Initialize dataout_row for station_id 1
@@ -212,7 +215,7 @@ def read_fifo_data():
                         dataout_row = dataout1_row + dataout2_row
                         dataout.append(dataout_row)
                         if counter % 10 == 0:
-                            sensor2_xyz = quat2_to_euler_xyz(quat2)
+                            sensor2_xyz = quat2_to_euler_xyz(scipy_quat2)
                             sensor2_angles.append(sensor2_xyz)
 
 
@@ -230,7 +233,7 @@ def read_fifo_data():
                     if station1 and station2:
 
                         if counter % 10 == 0:
-                            euler_angles = calculate_angular_difference(quat1, quat2)
+                            euler_angles = calculate_angular_difference(scipy_quat1, scipy_quat2)
                             angles.append(euler_angles)
 
                             if RawData:
