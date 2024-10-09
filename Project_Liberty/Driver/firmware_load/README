@@ -33,5 +33,19 @@ In case udev is not working correctly for you, you can try to manually load the 
 
     sudo fxload -v -D /proc/bus/usb/004/065 -I LbtyUsb8051.hex -t fx2 -s a3load.hex
 
+
+or use VendorID and ProductID instead of path: 
+
+check your USB device details using the system_profiler command
+
+```bash
+system_profiler SPUSBDataType
+```
+
+fxload -v -D 0x0f44:0xff21 -I /PathToFirmware/LbtyUsb8051.hex -t fx2 -s /PathToFirmware/a3load.hex
+
+
+
+
 Note: The file LbtyUsb8051.hex was graciously provided by Polhemus. Thanks a lot.
 

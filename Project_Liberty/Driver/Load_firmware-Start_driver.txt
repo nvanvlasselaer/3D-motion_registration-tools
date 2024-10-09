@@ -1,0 +1,51 @@
+
+******* Option 1: ******** 
+Using the path to usb device:
+
+
+```bash
+sudo fxload -v -D /proc/bus/usb/000/001 -I /Path_to_Firmware/LbtyUsb8051.hex -t fx2 -s /Path_to_Firmware/a3load.hex
+```
+
+
+Replace `/proc/bus/usb/000/001` with the correct path to your Liberty tracker. 
+You can find this path using the `lsusb` command or by checking the `/dev/bus/usb/` directory. 
+Make sure to use the correct path to your Liberty tracker.
+
+
+
+******* Option 2: *********
+for mac use Vendor ID and Product ID:
+
+
+## check your USB device details using the system_profiler command
+
+```bash
+system_profiler SPUSBDataType
+```
+
+        Liberty 2.0:
+
+          Product ID: 0xff20
+          Vendor ID: 0x0f44
+          Version: 0.00
+          Manufacturer: Polhemus
+          Location ID: 0x01100000
+
+
+fxload -v -D 0xYourVendorID:0xYourProductID -I /Path_to_Firmware/LbtyUsb8051.hex -t fx2 -s /Path_to_Firmware/a3load.hex
+
+
+### Replace YourVendorID and YourProductID
+
+
+fxload -v -D 0x0f44:0xff20 -I /Path_to_Firmware/LbtyUsb8051.hex -t fx2 -s /Path_to_Firmware/a3load.hex
+
+
+
+
+****** Run Driver: ********
+
+Run the compiled liberty make file:
+
+/Path_to_/Polhemus/src/liberty

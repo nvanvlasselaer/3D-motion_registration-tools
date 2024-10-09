@@ -20,6 +20,8 @@ On Debian GNU/Linux, you can install these dependencies by running the following
 sudo apt-get install fxload libusb-dev
 ```
 
+On Mac you can use homebrew (fxload, libusb and libusb-compat)
+
 ## Installation
 
 Follow these steps to install and set up the driver:
@@ -33,9 +35,9 @@ Follow these steps to install and set up the driver:
 ./liberty
 ```
 
-The driver should detect the connected motion tracker and display the number of sensors attached to it. It will then start printing the position and orientation data to the standard output (stdout).
+The driver should detect the connected motion tracker and display the number of sensors attached to it. It will then start printing the position and orientation data to the fifo location ("/tmp/motion_data_fifo").
 
-Note: Ensure that you connect the sensors correctly. Connect the first sensor to input #1 and subsequent sensors to the following inputs without leaving any empty inputs in between. For example, if you have three sensors, connect them to inputs #1, #2, and #3, rather than #1, #2, and #5.
+Note: Ensure that you connect the sensors correctly. Connect the first sensor to input #1 and subsequent sensors to the following inputs without leaving any empty inputs in between. For example, if you have three sensors, connect them to inputs #1, #2, and #3, rather than #1, #2, and #4.
 
 ## Development
 
