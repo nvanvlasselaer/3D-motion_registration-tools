@@ -14,7 +14,7 @@ import threading
 # filename = 'Bregje-Lsnapshot.csv'
 # data = path + filename
 
-data = '/Users/nicolas/Github/nvanvlasselaer/scribbles/DATA/knee_kinematics/Nicolas-Ldata.csv'
+data = 'pathtocsv.csv'
 
 ##### conversion to euler angles #####
 
@@ -81,16 +81,18 @@ def set_euler_sequence(sequence):
         z2 = float(row['z2'])
         q1 = w1, x1, y1, z1
         q2 = w2, x2, y2, z2
+        scipy_q1 = x1, y1, z1, w1
+        scipy_q2 = x2, y2, z2, w2
         # q1 = [x1, y1, z1, w1] # correct order for scipy
         # q2 = [x2, y2, z2, w2] # correct order for scipy
 
-        Sensor1 = quaternion_to_euler1(q1)
-        Sensor2 = quaternion_to_euler2(q2)
+        Sensor1 = quaternion_to_euler1(scipy_q1)
+        Sensor2 = quaternion_to_euler2(scipy_q2)
         Plot_euler_sensor_1.append(Sensor1)
         Plot_euler_sensor_2.append(Sensor2)
 
-        diff = calculate_angular_difference(q1, q2)
-        diff_inv = calculate_angular_difference_inv(q1, q2)
+        diff = calculate_angular_difference(scipy_q1, scipy_q2)
+        diff_inv = calculate_angular_difference_inv(scipy_q1, scipy_q2)
 
         Diff_plot.append(diff)
         Diff_plot_inv.append(diff_inv)
