@@ -171,7 +171,7 @@ int main()
     /* set output hemisphere -- this will produce a response which we're
        ignoring */
     // see page 34 for other hemisphere options
-    set_hemisphere(handle, 1, 0, 0);
+    set_hemisphere(handle, 0, 0, 1);
     /* switch output to centimeters */
     liberty_send(handle, "u1\r");
     liberty_clear_input(handle); //right now, we just ignore the answer
